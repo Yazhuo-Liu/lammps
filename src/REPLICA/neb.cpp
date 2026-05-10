@@ -248,13 +248,13 @@ void NEB::run()
 
       if (print_mode != TERSE) {
         for (int i = 1; i <= nreplica; ++i)
-          utils::print(uscreen, "{:^14} {:^14} ", "RD" + std::to_string(i), "PE" + std::to_string(i));
+          utils::print(uscreen, "{:^14} {:^26} ", "RD" + std::to_string(i), "PE" + std::to_string(i));
       }
 
       if (print_mode == VERBOSE) {
         for (int i = 1; i <= nreplica; ++i) {
           auto idx = std::to_string(i);
-          utils::print(uscreen, "{:^12}{:^12}{:^12} {:^12} {:^12}{:^12} ", "pathangle" + idx,
+          utils::print(uscreen, "{:^16} {:^16} {:^16} {:^16} {:^16} {:^16} ", "pathangle" + idx,
                      "angletangrad" + idx, "anglegrad" + idx, "gradV" + idx, "RepForce" + idx,
                      "MaxAtomForce" + idx);
         }
@@ -269,14 +269,14 @@ void NEB::run()
 
       if (print_mode != TERSE) {
         for (int i = 1; i <= nreplica; ++i)
-          utils::print(ulogfile, "{:^14} {:^14} ", "RD" + std::to_string(i),
+          utils::print(ulogfile, "{:^14} {:^26} ", "RD" + std::to_string(i),
                      "PE" + std::to_string(i));
       }
 
       if (print_mode == VERBOSE) {
         for (int i = 1; i <= nreplica; ++i) {
           auto idx = std::to_string(i);
-          utils::print(ulogfile, "{:^12}{:^12}{:^12} {:^12} {:^12}{:^12} ", "pathangle" + idx,
+          utils::print(ulogfile, "{:^16} {:^16} {:^16} {:^16} {:^16} {:^16} ", "pathangle" + idx,
                      "angletangrad" + idx, "anglegrad" + idx, "gradV" + idx, "RepForce" + idx,
                      "MaxAtomForce" + idx);
         }
@@ -347,13 +347,13 @@ void NEB::run()
 
       if (print_mode != TERSE) {
         for (int i = 1; i <= nreplica; ++i)
-          utils::print(uscreen, "{:^14} {:^14} ", "RD" + std::to_string(i), "PE" + std::to_string(i));
+          utils::print(uscreen, "{:^14} {:^26} ", "RD" + std::to_string(i), "PE" + std::to_string(i));
       }
 
       if (print_mode == VERBOSE) {
         for (int i = 1; i <= nreplica; ++i) {
           auto idx = std::to_string(i);
-          utils::print(uscreen, "{:^12}{:^12}{:^12} {:^12} {:^12}{:^12} ", "pathangle" + idx,
+          utils::print(uscreen, "{:^16} {:^16} {:^16} {:^16} {:^16} {:^16} ", "pathangle" + idx,
                      "angletangrad" + idx, "anglegrad" + idx, "gradV" + idx, "RepForce" + idx,
                      "MaxAtomForce" + idx);
         }
@@ -368,14 +368,14 @@ void NEB::run()
 
       if (print_mode != TERSE) {
         for (int i = 1; i <= nreplica; ++i)
-          utils::print(ulogfile, "{:^14} {:^14} ", "RD" + std::to_string(i),
+          utils::print(ulogfile, "{:^14} {:^26} ", "RD" + std::to_string(i),
                      "PE" + std::to_string(i));
       }
 
       if (print_mode == VERBOSE) {
         for (int i = 1; i <= nreplica; ++i) {
           auto idx = std::to_string(i);
-          utils::print(ulogfile, "{:^12}{:^12}{:^12} {:^12} {:^12}{:^12} ", "pathangle" + idx,
+          utils::print(ulogfile, "{:^16} {:^16} {:^16} {:^16} {:^16} {:^16} ", "pathangle" + idx,
                      "angletangrad" + idx, "anglegrad" + idx, "gradV" + idx, "RepForce" + idx,
                      "MaxAtomForce" + idx);
         }
@@ -684,18 +684,18 @@ void NEB::print_status()
     mesg += fmt::format("{:<14.8g} {:<14.8g} {:<14.8g} ", ebf, ebr, endpt);
     if (print_mode != TERSE) {
       for (int i = 0; i < nreplica; i++)
-        mesg += fmt::format("{:<14.8g} {:<14.8g} ", rdist[i], all[i][0]);
+        mesg += fmt::format("{:<14.8g} {:<26.20g} ", rdist[i], all[i][0]);
     }
     if (print_mode == VERBOSE) {
-      mesg += fmt::format("{:<12.5g} {:<12.5g} {:<12.5g} {:<12.5g} {:<12.5g} {:<12.5g}", NAN,
+      mesg += fmt::format("{:<16.7g} {:<16.7g} {:<16.7g} {:<16.7g} {:<16.7g} {:<16.7g} ", NAN,
                           180 - acos(all[0][5]) * todeg, 180 - acos(all[0][6]) * todeg, all[0][3],
                           freplica[0], fmaxatomInRepl[0]);
       for (int i = 1; i < nreplica - 1; i++)
         mesg +=
-            fmt::format("{:<12.5g} {:<12.5g} {:<12.5g} {:<12.5g} {:<12.5g} {:<12.5g}",
+            fmt::format("{:<16.7g} {:<16.7g} {:<16.7g} {:<16.7g} {:<16.7g} {:<16.7g} ",
                         180 - acos(all[i][4]) * todeg, 180 - acos(all[i][5]) * todeg,
                         180 - acos(all[i][6]) * todeg, all[i][3], freplica[i], fmaxatomInRepl[i]);
-      mesg += fmt::format("{:<12.5g} {:<12.5g} {:<12.5g} {:<12.5g} {:<12.5g} {:<12.5g}", NAN,
+      mesg += fmt::format("{:<16.7g} {:<16.7g} {:<16.7g} {:<16.7g} {:<16.7g} {:<16.7g} ", NAN,
                           180 - acos(all[nreplica - 1][5]) * todeg, NAN, all[nreplica - 1][3],
                           freplica[nreplica - 1], fmaxatomInRepl[nreplica - 1]);
     }
