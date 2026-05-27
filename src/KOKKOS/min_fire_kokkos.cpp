@@ -13,7 +13,8 @@
 ------------------------------------------------------------------------- */
 
 /* ----------------------------------------------------------------------
-   Contributing author: Mitch Murphy (alphataubio at gmail)
+   Contributing authors: Mitch Murphy (alphataubio at gmail)
+                         Joshua Kempfert (hotfix for GPU sync issues)
 ------------------------------------------------------------------------- */
 
 #include "min_fire_kokkos.h"
@@ -121,9 +122,8 @@ int MinFireKokkos::run_iterate(int maxiter) {
   int nlocal = atom->nlocal;
 
   if constexpr (INTEGRATOR == LEAPFROG) {
-    // ghost position/vel might change on host during legacy comm
-    // but already just synced top of run_iterate()
     energy_force(0);
+    atomKK->sync(Device, X_MASK | V_MASK); //! ensure that x and v are synced before mutating (Kempfert)
     neval++;
     double dtf = -0.5 * dt * force->ftm2v;
     Kokkos::parallel_for("min_fire/leapfrog_init", atom->nlocal, LAMMPS_LAMBDA(const int i) {
@@ -215,10 +215,11 @@ int MinFireKokkos::run_iterate(int maxiter) {
     }
 
     if (!ABCFLAG && flagv0) {
-      atomKK->modified(Device, X_MASK | V_MASK);
+      atomKK->modified(Device, X_MASK | V_MASK); //! ensure that x and v are synced before mutating (Kempfert)
       atomKK->sync(Host, X_MASK | V_MASK);
-      energy_force(0); // ghost position/vel might change on host during legacy comm
+      energy_force(0);
       atomKK->sync(Device, X_MASK | V_MASK);
+
       neval++;
       double dtf_init = dt * force->ftm2v;
       Kokkos::parallel_for("min_fire/v_init", nlocal, LAMMPS_LAMBDA(const int i) {
@@ -320,7 +321,7 @@ int MinFireKokkos::run_iterate(int maxiter) {
     atomKK->modified(Device, X_MASK | V_MASK);
     atomKK->sync(Host, X_MASK | V_MASK);
     ecurrent = energy_force(0); // ghost position/vel might change on host during legacy comm
-    atomKK->sync(Device, X_MASK | V_MASK);
+    atomKK->sync(Device, X_MASK | V_MASK); //! ensure that x and v are synced before mutating (Kempfert)
     neval++;
 
     if constexpr (INTEGRATOR == VERLET) {
@@ -373,9 +374,11 @@ int MinFireKokkos::run_iterate(int maxiter) {
     }
 
     if (output->next == ntimestep) {
+      atomKK->sync(Host,ALL_MASK); //! sync before output (Kempfert)
       timer->stamp();
       output->write(ntimestep);
       timer->stamp(Timer::OUTPUT);
+      atomKK->sync(Device,ALL_MASK); //! sync back to device in case host modified something
     }
   }
   atomKK->modified(Device, X_MASK | V_MASK);
